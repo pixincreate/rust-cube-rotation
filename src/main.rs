@@ -281,7 +281,7 @@ impl Component for Shape {
                     <button onclick={link.callback(|_| Msg::AddBox)}>{ "Add Box" }</button>
                     <button onclick={link.callback(|_| Msg::RemoveBox)}>{ "Remove Box" }</button>
             
-                    <svg viewBox="0.0 0.0 600.0 600.0">
+                    <svg viewBox="0.0 0.0 1800.0 475.0">
                         <g>
                             {
                                 self.edges
@@ -302,7 +302,7 @@ impl Component for Shape {
                         self.shapes.iter().map(|_child| {
                             html! {
                                 <div>
-                                    <svg viewBox="0.0 0.0 600.0 600.0">
+                                    <svg viewBox="0.0 0.0 1800.0 475.0">
                                         <g>
                                             {
                                                 self.edges
