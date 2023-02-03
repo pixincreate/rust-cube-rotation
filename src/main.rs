@@ -12,7 +12,12 @@ enum Msg {
     RemoveBox,
     Click,
 }
-#[derive(Clone)]
+
+#[allow(dead_code)]
+struct Child {
+    value: i64
+}
+
 struct Point3D {
     x: f64,
     y: f64,
@@ -23,7 +28,7 @@ struct Point2D {
     x: f64,
     y: f64,
 }
-#[derive(Clone)]
+
 struct Edge(usize, usize);
 
 struct Angle3D {
@@ -35,7 +40,7 @@ struct Angle3D {
 type AngleVelocity = Angle3D;
 
 struct Shape {
-    shapes: Vec<Shape>,
+    shapes: Vec<Child>,
     vertices: Vec<Point3D>,
     edges: Vec<Edge>,
     angle_velocity: AngleVelocity,
@@ -65,7 +70,7 @@ impl Component for Shape {
     type Message = Msg;
     type Properties = ();
 
-    // points are aded in the form of binary.
+    // points are added in the form of binary.
     // 100 == 0; -100 == 1
     // 000, 001, 010, 011, 100, 101, 110, 111
     fn create(_ctx: &Context<Self>) -> Self {
@@ -138,7 +143,7 @@ impl Component for Shape {
             },
             direction_multiplier: true,
             velocity_multiplier: 1.0,
-            shapes: Vec::new(), 
+            shapes: Vec::new(),
         }
     }
 
@@ -155,17 +160,9 @@ impl Component for Shape {
             .forget();
         }
     }
+
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Msg::AddBox => {
-                self.shapes.push(Shape::create(_ctx));
-            },
-            Msg::RemoveBox => {
-                if !self.shapes.is_empty() {
-                    self.shapes.pop();
-                }
-            },
-
             Msg::VelocityIncrement => self.velocity_multiplier *= 2.0,
             Msg::VelocityDecrement => self.velocity_multiplier /= 2.0,
 
@@ -175,6 +172,13 @@ impl Component for Shape {
             Msg::RotY => if self.direction_multiplier {self.angle_velocity.ya += ACCELERATE_BY * self.velocity_multiplier} else {self.angle_velocity.ya -= ACCELERATE_BY * self.velocity_multiplier},
             Msg::RotZ => if self.direction_multiplier {self.angle_velocity.za += ACCELERATE_BY * self.velocity_multiplier} else {self.angle_velocity.za -= ACCELERATE_BY * self.velocity_multiplier},
             
+            Msg::AddBox => {
+                self.shapes.push(Child { value: 0 });
+            },
+            Msg::RemoveBox => {
+                self.shapes.pop();
+            },
+
             Msg::Click => {}
         }
         
@@ -258,47 +262,85 @@ impl Component for Shape {
                 )
             })
             .collect::<Html>();
-        let link = ctx.link();
 
-        html! {
-            <div>
-                <button onclick={link.callback(|_| Msg::RotX)}>{ "rot X" }</button>
-                <button onclick={link.callback(|_| Msg::RotY)}>{ "rot Y" }</button>
-                <button onclick={link.callback(|_| Msg::RotZ)}>{ "rot Z" }</button>
-                <br/>
-                <br/>
-                <button onclick={link.callback(|_| Msg::RotRev)}>{ "Direction Reverse" }</button>
-                <br/>
-                <button onclick={link.callback(|_| Msg::VelocityIncrement)}>{ "Velocity ++" }</button>
-                <button onclick={link.callback(|_| Msg::VelocityDecrement)}>{ "Velocity --" }</button>
-                <br/>
-                <br/>
-                <button onclick={link.callback(|_| Msg::AddBox)}>{ "Add Box" }</button>
-                <button onclick={link.callback(|_| Msg::RemoveBox)}>{ "Remove Box" }</button>
-                <svg viewBox="0.0 0.0 1200.0 600.0">
-                    <g>
-                        {
-                            self.edges
-                            .iter()
-                            .map(|edge| {
-                                let point1 = &point2dvec[edge.0];
-                                let point2 = &point2dvec[edge.1];
-                                html! {
-                                <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black"/>
-                                }
-                            })
-                            .collect::<Vec<Html>>()
-                        }
-                        {points}
-                    </g>
-                </svg>
-                {for self.shapes.iter().map(|shape| shape.view(ctx))}
-            </div>
-        }
+        let link = ctx.link();
+        
+            html! {
+                <div>
+                    <button onclick={link.callback(|_| Msg::RotX)}>{ "rot X" }</button>
+                    <button onclick={link.callback(|_| Msg::RotY)}>{ "rot Y" }</button>
+                    <button onclick={link.callback(|_| Msg::RotZ)}>{ "rot Z" }</button>
+                    <br/>
+                    <br/>
+                    <button onclick={link.callback(|_| Msg::RotRev)}>{ "Direction Reverse" }</button>
+                    <br/>
+                    <button onclick={link.callback(|_| Msg::VelocityIncrement)}>{ "Velocity ++" }</button>
+                    <button onclick={link.callback(|_| Msg::VelocityDecrement)}>{ "Velocity --" }</button>
+                    <br/>
+                    <br/>
+                    <button onclick={link.callback(|_| Msg::AddBox)}>{ "Add Box" }</button>
+                    <button onclick={link.callback(|_| Msg::RemoveBox)}>{ "Remove Box" }</button>
+            
+                    <svg viewBox="0.0 0.0 600.0 600.0">
+                        <g>
+                            {
+                                self.edges
+                                .iter()
+                                .map(|edge| {
+                                    let point1 = &point2dvec[edge.0];
+                                    let point2 = &point2dvec[edge.1];
+                                    html! {
+                                    <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black"/>
+                                    }
+                                })
+                                .collect::<Vec<Html>>()
+                            }
+                            {points}
+                        </g>
+                    </svg>
+                    {
+                        self.shapes.iter().map(|_child| {
+                            html! {
+                                <div>
+                                    <svg viewBox="0.0 0.0 600.0 600.0">
+                                        <g>
+                                            {
+                                                self.edges
+                                                .iter()
+                                                .map(|edge| {
+                                                    let point1 = &point2dvec[edge.0];
+                                                    let point2 = &point2dvec[edge.1];
+                                                    html! {
+                                                        <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black">
+                                                        </line>
+                                                    }
+                                                })
+                                                .collect::<Vec<Html>>()
+                                            } {
+                                                point2dvec
+                                                .iter()
+                                                .enumerate()
+                                                .map(|(index, point)| {
+                                                    html! (
+                                                        <>
+                                                        <text x={(point.x + 5.0).to_string()} y={(point.y + 5.0).to_string()}>{index}</text>
+                                                        <circle cx={point.x.to_string()} cy={point.y.to_string()} r="2" />
+                                                        </>
+                                                    )
+                                                })
+                                                .collect::<Html>()
+                                            }
+                                        </g>
+                                    </svg>         
+                                </div>
+                            }
+                        }).collect::<Vec<Html>>()     
+                    }
+                </div>
+            }
     }
 }
 
 fn main() {
     yew::start_app::<Shape>();
 }
-        
