@@ -26,6 +26,6 @@ rustup target add wasm32-unknown-unknown
 trunk serve
 ```
 
-The page can be accessed at [localhost](http://localhost:8080/)
+The page can be accessed at [localhost](http://127.0.0.1:8080/)
 
-![demo gif](https://github.com/Narayanbhat166/cube_rotation/blob/main/cube_rotation.gif)
+![demo gif](https://github.com/pixincreate/rust-cube-rotation/blob/main/cube_rotation.gif)
