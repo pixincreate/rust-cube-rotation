@@ -5,16 +5,16 @@ enum Msg {
     RotX,
     RotY,
     RotZ,
-    RotRev,
-    VelocityIncrement,
-    VelocityDecrement,
-    AddBox,
-    RemoveBox,
+    RotRev, // Added Feature
+    VelocityIncrement, // Added Feature
+    VelocityDecrement, // Added Feature
+    AddBox, // Added Feature
+    RemoveBox, // Added Feature
     Click,
 }
 
 #[allow(dead_code)]
-struct Child {
+struct Spawn {
     value: i64
 }
 
@@ -40,7 +40,7 @@ struct Angle3D {
 type AngleVelocity = Angle3D;
 
 struct Shape {
-    shapes: Vec<Child>,
+    shapes: Vec<Spawn>,
     vertices: Vec<Point3D>,
     edges: Vec<Edge>,
     angle_velocity: AngleVelocity,
@@ -162,18 +162,31 @@ impl Component for Shape {
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+
         match msg {
             Msg::VelocityIncrement => self.velocity_multiplier *= 2.0,
             Msg::VelocityDecrement => self.velocity_multiplier /= 2.0,
 
             Msg::RotRev => self.direction_multiplier = !self.direction_multiplier,
 
-            Msg::RotX => if self.direction_multiplier {self.angle_velocity.xa += ACCELERATE_BY * self.velocity_multiplier} else {self.angle_velocity.xa -= ACCELERATE_BY * self.velocity_multiplier},
-            Msg::RotY => if self.direction_multiplier {self.angle_velocity.ya += ACCELERATE_BY * self.velocity_multiplier} else {self.angle_velocity.ya -= ACCELERATE_BY * self.velocity_multiplier},
-            Msg::RotZ => if self.direction_multiplier {self.angle_velocity.za += ACCELERATE_BY * self.velocity_multiplier} else {self.angle_velocity.za -= ACCELERATE_BY * self.velocity_multiplier},
+            Msg::RotX => if self.direction_multiplier {
+                            self.angle_velocity.xa += ACCELERATE_BY * self.velocity_multiplier
+                        } else {
+                            self.angle_velocity.xa -= ACCELERATE_BY * self.velocity_multiplier
+                        },
+            Msg::RotY => if self.direction_multiplier {
+                            self.angle_velocity.ya += ACCELERATE_BY * self.velocity_multiplier
+                        } else {
+                            self.angle_velocity.ya -= ACCELERATE_BY * self.velocity_multiplier
+                        },
+            Msg::RotZ => if self.direction_multiplier {
+                            self.angle_velocity.za += ACCELERATE_BY * self.velocity_multiplier
+                        } else {
+                            self.angle_velocity.za -= ACCELERATE_BY * self.velocity_multiplier
+                        },
             
             Msg::AddBox => {
-                self.shapes.push(Child { value: 0 });
+                self.shapes.push(Spawn { value: 0 });
             },
             Msg::RemoveBox => {
                 self.shapes.pop();
@@ -266,56 +279,60 @@ impl Component for Shape {
         let link = ctx.link();
         
             html! {
-                <div>
-                    <button onclick={link.callback(|_| Msg::RotX)}>{ "rot X" }</button>
-                    <button onclick={link.callback(|_| Msg::RotY)}>{ "rot Y" }</button>
-                    <button onclick={link.callback(|_| Msg::RotZ)}>{ "rot Z" }</button>
-                    <br/>
-                    <br/>
-                    <button onclick={link.callback(|_| Msg::RotRev)}>{ "Direction Reverse" }</button>
-                    <br/>
-                    <button onclick={link.callback(|_| Msg::VelocityIncrement)}>{ "Velocity ++" }</button>
-                    <button onclick={link.callback(|_| Msg::VelocityDecrement)}>{ "Velocity --" }</button>
-                    <br/>
-                    <br/>
-                    <button onclick={link.callback(|_| Msg::AddBox)}>{ "Add Box" }</button>
-                    <button onclick={link.callback(|_| Msg::RemoveBox)}>{ "Remove Box" }</button>
-            
-                    <svg viewBox="0.0 0.0 1800.0 475.0">
-                        <g>
-                            {
-                                self.edges
-                                .iter()
-                                .map(|edge| {
-                                    let point1 = &point2dvec[edge.0];
-                                    let point2 = &point2dvec[edge.1];
-                                    html! {
-                                    <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black"/>
-                                    }
-                                })
-                                .collect::<Vec<Html>>()
-                            }
-                            {points}
-                        </g>
-                    </svg>
-                    {
-                        self.shapes.iter().map(|_child| {
-                            html! {
-                                <div>
-                                    <svg viewBox="0.0 0.0 1800.0 475.0">
-                                        <g>
-                                            {
-                                                self.edges
-                                                .iter()
-                                                .map(|edge| {
-                                                    let point1 = &point2dvec[edge.0];
-                                                    let point2 = &point2dvec[edge.1];
-                                                    html! {
-                                                        <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black">
-                                                        </line>
-                                                    }
-                                                })
-                                                .collect::<Vec<Html>>()
+                <>
+                    <div>
+                    <h1>{ "CUBE ROTATION" }</h1>
+                    <h3> {"PiXiCreate's feature implementation"} </h3>
+                    </div>
+                    <div>
+                        <button onclick={link.callback(|_| Msg::RotX)}>{ "Rotate X" }</button>
+                        <button onclick={link.callback(|_| Msg::RotY)}>{ "Rotate Y" }</button>
+                        <button onclick={link.callback(|_| Msg::RotZ)}>{ "Rotate Z" }</button>
+                        <br/>
+                        <br/>
+                        <button onclick={link.callback(|_| Msg::RotRev)}>{ "Reverse the Directions.!" }</button>
+                        <br/>
+                        <button onclick={link.callback(|_| Msg::VelocityIncrement)}>{ "Velocity ↑↑" }</button>
+                        <button onclick={link.callback(|_| Msg::VelocityDecrement)}>{ "Velocity ↓↓" }</button>
+                        <br/>
+                        <br/>
+                        <button onclick={link.callback(|_| Msg::AddBox)}>{ "Add a Cube +" }</button>
+                        <button onclick={link.callback(|_| Msg::RemoveBox)}>{ "Remove a Cube -" }</button>
+                
+                        <svg viewBox="0.0 0.0 1000.0 475.0">
+                            <g>
+                                {
+                                    self.edges
+                                    .iter()
+                                    .map(|edge| {
+                                        let point1 = &point2dvec[edge.0];
+                                        let point2 = &point2dvec[edge.1];
+                                        html! {
+                                        <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black"/>
+                                        }
+                                    })
+                                    .collect::<Vec<Html>>()
+                                }
+                                {points}
+                            </g>
+                        </svg>
+                        {
+                            self.shapes.iter().map(|_spawn| {
+                                html! {
+                                    <div>
+                                        <svg viewBox="0.0 0.0 1000.0 475.0">
+                                            <g> {
+                                                    self.edges
+                                                    .iter()
+                                                    .map(|edge| {
+                                                        let point1 = &point2dvec[edge.0];
+                                                        let point2 = &point2dvec[edge.1];
+                                                        html! {
+                                                            <line x1={point1.x.to_string()} y1={point1.y.to_string()} x2={point2.x.to_string()} y2={point2.y.to_string()} stroke="black">
+                                                            </line>
+                                                        }
+                                                    })
+                                                    .collect::<Vec<Html>>()
                                             } {
                                                 point2dvec
                                                 .iter()
@@ -330,13 +347,14 @@ impl Component for Shape {
                                                 })
                                                 .collect::<Html>()
                                             }
-                                        </g>
-                                    </svg>         
-                                </div>
-                            }
-                        }).collect::<Vec<Html>>()     
-                    }
-                </div>
+                                            </g>
+                                        </svg>         
+                                    </div>
+                                }
+                            }).collect::<Vec<Html>>()     
+                        }
+                    </div>
+                </>
             }
     }
 }
